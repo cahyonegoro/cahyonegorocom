@@ -13,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
 
     // Replace with your credentials
-    $correct_username = 'admin';
-    $correct_password = 'password';
+    $correct_username = 'cahyonegoro';
+    $correct_password = 'M@ster234';
 
     if ($username === $correct_username && $password === $correct_password) {
         $_SESSION['loggedin'] = true;
