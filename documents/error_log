@@ -1,0 +1,18 @@
+[18-Aug-2024 09:40:31 Asia/Jakarta] PHP Warning:  require(phpqrcode/qrlib.php): Failed to open stream: No such file or directory in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:40:31 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required 'phpqrcode/qrlib.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/cahp3372/public_html/documents/index.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:40:46 Asia/Jakarta] PHP Warning:  require(phpqrcode/qrlib.php): Failed to open stream: No such file or directory in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:40:46 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required 'phpqrcode/qrlib.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/cahp3372/public_html/documents/index.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:40:52 Asia/Jakarta] PHP Warning:  require(phpqrcode/qrlib.php): Failed to open stream: No such file or directory in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:40:52 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required 'phpqrcode/qrlib.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/cahp3372/public_html/documents/index.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:42:02 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting end of file in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:42:13 Asia/Jakarta] PHP Parse error:  syntax error, unexpected token "<", expecting end of file in /home/cahp3372/public_html/documents/index.php on line 2
+[18-Aug-2024 09:52:58 Asia/Jakarta] PHP Parse error:  syntax error, unexpected single-quoted string ");", expecting ")" in /home/cahp3372/public_html/documents/index.php on line 5
