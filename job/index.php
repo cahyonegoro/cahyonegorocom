@@ -58,7 +58,7 @@ $categories = $mysqli->query("SELECT * FROM categories");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Monitoring</title>
+    <title>Task Monitoring Job Cahyo Negoro</title>
     <style>
         /* General Styles */
         body {
