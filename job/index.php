@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // Database connection
 $mysqli = new mysqli("localhost", "cahp3372_cahyonegoro", "M@ster234", "cahp3372_cahyonegoro");
 
@@ -8,20 +10,26 @@ if ($mysqli->connect_error) {
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Add new task
     if ($_POST['action'] == 'create') {
+        // Add new task
         $stmt = $mysqli->prepare("INSERT INTO tasks (task_name, description, start_date, due_date, priority, status, category_id, progress) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("ssssssii", $_POST['task_name'], $_POST['description'], $_POST['start_date'], $_POST['due_date'], $_POST['priority'], $_POST['status'], $_POST['category'], $_POST['progress']);
         $stmt->execute();
         $stmt->close();
-    }
-
-    // Update task
-    if ($_POST['action'] == 'update') {
+    } elseif ($_POST['action'] == 'update') {
+        // Update task
         $stmt = $mysqli->prepare("UPDATE tasks SET task_name=?, description=?, start_date=?, due_date=?, completion_date=?, priority=?, status=?, category_id=?, progress=? WHERE task_id=?");
         $stmt->bind_param("sssssssiii", $_POST['task_name'], $_POST['description'], $_POST['start_date'], $_POST['due_date'], $_POST['completion_date'], $_POST['priority'], $_POST['status'], $_POST['category'], $_POST['progress'], $_POST['task_id']);
         $stmt->execute();
         $stmt->close();
+    } elseif ($_POST['action'] == 'delete') {
+        // Delete task
+        $task_id = $_POST['task_id'];
+        $mysqli->query("DELETE FROM tasks WHERE task_id = $task_id");
+    } elseif ($_POST['action'] == 'complete') {
+        // Mark task as completed
+        $task_id = $_POST['task_id'];
+        $mysqli->query("UPDATE tasks SET status='Completed' WHERE task_id = $task_id");
     }
 }
 
@@ -39,6 +47,16 @@ $categories = $mysqli->query("SELECT * FROM categories");
     <title>Task Monitoring</title>
     <style>
         /* Add your CSS styling here */
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -106,7 +124,40 @@ $categories = $mysqli->query("SELECT * FROM categories");
     <?php while ($task = $tasks->fetch_assoc()): ?>
         <tr>
             <td><?php echo $task['task_id']; ?></td>
-            <td><?php echo $task['task_name']; ?></td>
+            <td>
+                <?php if (isset($_POST['edit_task_id']) && $_POST['edit_task_id'] == $task['task_id']): ?>
+                    <form action="index.php" method="POST">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="task_id" value="<?php echo $task['task_id']; ?>">
+                        <input type="text" name="task_name" value="<?php echo $task['task_name']; ?>" required><br>
+                        <textarea name="description"><?php echo $task['description']; ?></textarea><br>
+                        <input type="date" name="start_date" value="<?php echo $task['start_date']; ?>"><br>
+                        <input type="date" name="due_date" value="<?php echo $task['due_date']; ?>"><br>
+                        <input type="date" name="completion_date" value="<?php echo $task['completion_date']; ?>"><br>
+                        <select name="priority">
+                            <option value="Low" <?php echo $task['priority'] == 'Low' ? 'selected' : ''; ?>>Low</option>
+                            <option value="Medium" <?php echo $task['priority'] == 'Medium' ? 'selected' : ''; ?>>Medium</option>
+                            <option value="High" <?php echo $task['priority'] == 'High' ? 'selected' : ''; ?>>High</option>
+                        </select><br>
+                        <select name="status">
+                            <option value="Not Started" <?php echo $task['status'] == 'Not Started' ? 'selected' : ''; ?>>Not Started</option>
+                            <option value="In Progress" <?php echo $task['status'] == 'In Progress' ? 'selected' : ''; ?>>In Progress</option>
+                            <option value="Completed" <?php echo $task['status'] == 'Completed' ? 'selected' : ''; ?>>Completed</option>
+                            <option value="On Hold" <?php echo $task['status'] == 'On Hold' ? 'selected' : ''; ?>>On Hold</option>
+                        </select><br>
+                        <select name="category">
+                            <?php while ($row = $categories->fetch_assoc()): ?>
+                                <option value="<?php echo $row['category_id']; ?>" <?php echo $row['category_id'] == $task['category_id'] ? 'selected' : ''; ?>><?php echo $row['category_name']; ?></option>
+                            <?php endwhile; ?>
+                        </select><br>
+                        <input type="number" name="progress" min="0" max="100" value="<?php echo $task['progress']; ?>"><br>
+                        <input type="submit" value="Save">
+                        <a href="index.php">Cancel</a>
+                    </form>
+                <?php else: ?>
+                    <?php echo $task['task_name']; ?>
+                <?php endif; ?>
+            </td>
             <td><?php echo $task['description']; ?></td>
             <td><?php echo $task['start_date']; ?></td>
             <td><?php echo $task['due_date']; ?></td>
@@ -116,11 +167,24 @@ $categories = $mysqli->query("SELECT * FROM categories");
             <td><?php echo $task['category_name']; ?></td>
             <td><?php echo $task['progress']; ?>%</td>
             <td>
-                <form action="index.php" method="POST">
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="task_id" value="<?php echo $task['task_id']; ?>">
-                    <input type="submit" value="Edit">
-                </form>
+                <?php if (isset($_POST['edit_task_id']) && $_POST['edit_task_id'] == $task['task_id']): ?>
+                    <!-- Save and Cancel buttons already in the edit form -->
+                <?php else: ?>
+                    <form action="index.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="edit_task_id" value="<?php echo $task['task_id']; ?>">
+                        <input type="submit" value="Edit">
+                    </form>
+                    <form action="index.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="task_id" value="<?php echo $task['task_id']; ?>">
+                        <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this task?');">
+                    </form>
+                    <form action="index.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="complete">
+                        <input type="hidden" name="task_id" value="<?php echo $task['task_id']; ?>">
+                        <input type="submit" value="Complete">
+                    </form>
+                <?php endif; ?>
             </td>
         </tr>
     <?php endwhile; ?>
