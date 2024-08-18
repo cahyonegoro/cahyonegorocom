@@ -2,7 +2,7 @@
 session_start();
 
 // Database connection
-$mysqli = new mysqli("localhost", "root", "M@ster234", "cahp3372_cahyonegoro");
+$mysqli = new mysqli("localhost", "cahp3372_cahyonegoro", "M@ster234", "cahp3372_cahyonegoro");
 
 if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
