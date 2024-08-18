@@ -1,3 +1,31 @@
+<?php
+session_start();
+
+// Check if the user is already logged in, if yes then redirect to index.php
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    header("Location: index.php");
+    exit;
+}
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Replace with your credentials
+    $correct_username = 'admin';
+    $correct_password = 'password';
+
+    if ($username === $correct_username && $password === $correct_password) {
+        $_SESSION['loggedin'] = true;
+        header("Location: index.php");
+        exit;
+    } else {
+        $error = "Invalid username or password.";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
