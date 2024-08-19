@@ -7,21 +7,43 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 
-$error = '';
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    if (isset($_POST['action']) && $_POST['action'] == 'create') {
+        $title = trim($_POST['title']);
+        $date = trim($_POST['date']);
 
-    // Replace with your credentials
-    $correct_username = 'cahyonegoro';
-    $correct_password = 'M@ster234';
+        if (!empty($title) && !empty($date)) {
+            // Generate a unique ID for the document
+            $id = time(); // You can use time or any other method to generate a unique ID
 
-    if ($username === $correct_username && $password === $correct_password) {
-        $_SESSION['loggedin'] = true;
+            // Prepare the data to be written to the file
+            $documentLine = "$id|$title|$date" . PHP_EOL;
+
+            // Write the data to the text file
+            file_put_contents('documents.txt', $documentLine, FILE_APPEND);
+
+            // Redirect to avoid form resubmission
+            header("Location: index.php");
+            exit;
+        }
+    } elseif (isset($_POST['action']) && $_POST['action'] == 'delete') {
+        $idToDelete = $_POST['id'];
+
+        // Read the current lines from the file
+        $lines = file('documents.txt', FILE_IGNORE_NEW_LINES);
+
+        // Filter out the line with the matching ID
+        $newLines = array_filter($lines, function ($line) use ($idToDelete) {
+            return strpos($line, $idToDelete . '|') !== 0;
+        });
+
+        // Write the remaining lines back to the file
+        file_put_contents('documents.txt', implode(PHP_EOL, $newLines) . PHP_EOL);
+
+        // Redirect to avoid form resubmission
         header("Location: index.php");
         exit;
-    } else {
-        $error = "Invalid username or password.";
     }
 }
 ?>
@@ -32,111 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Document</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        form {
-            margin-bottom: 40px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        input[type="text"],
-        input[type="date"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        input[type="submit"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-            color: #333;
-        }
-        td {
-            background-color: #fff;
-            color: #555;
-        }
-        .delete-btn {
-            color: red;
-            text-decoration: none;
-            cursor: pointer;
-            padding: 8px 12px;
-            border: 1px solid red;
-            border-radius: 4px;
-            background-color: #fdd;
-        }
-        .delete-btn:hover {
-            background-color: #fbb;
-        }
-        img {
-            max-width: 100px;
-            height: auto;
-            border-radius: 4px;
-        }
-        .logout {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        .logout a {
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #f2f2f2;
-        }
-        .logout a:hover {
-            background-color: #ddd;
-        }
-    </style>
+    <!-- Add your styles here -->
 </head>
 <body>
 <div class="container">
@@ -168,9 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <tbody>
         <?php
         if (file_exists('documents.txt')) {
-            $lines = file('documents.txt');
+            $lines = file('documents.txt', FILE_IGNORE_NEW_LINES);
             foreach ($lines as $line) {
-                list($id, $title, $date) = explode('|', trim($line));
+                list($id, $title, $date) = explode('|', $line);
                 $qrFile = "qr_codes/$id.png";
                 echo "<tr>";
                 echo "<td>" . htmlspecialchars($id) . "</td>";
