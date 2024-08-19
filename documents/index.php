@@ -7,6 +7,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 
+// Include the PHP QR Code library
+include('phpqrcode/qrlib.php');
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'create') {
@@ -22,6 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Write the data to the text file
             file_put_contents('documents.txt', $documentLine, FILE_APPEND);
+
+            // Generate the QR code
+            $qrContent = "https://cahyonegoro.com/verify/$id"; // URL to be embedded in the QR code
+            $qrFile = "qr_codes/$id.png";
+            QRcode::png($qrContent, $qrFile);
 
             // Redirect to avoid form resubmission
             header("Location: index.php");
@@ -40,6 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Write the remaining lines back to the file
         file_put_contents('documents.txt', implode(PHP_EOL, $newLines) . PHP_EOL);
+
+        // Optionally, delete the QR code file associated with the document
+        $qrFile = "qr_codes/$idToDelete.png";
+        if (file_exists($qrFile)) {
+            unlink($qrFile);
+        }
 
         // Redirect to avoid form resubmission
         header("Location: index.php");
