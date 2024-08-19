@@ -7,22 +7,55 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+// Handle document creation
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'create') {
+    $title = $_POST['title'];
+    $date = $_POST['date'] ?: date('Y-m-d'); // Default to today if no date provided
+    $id = uniqid(); // Generate a unique ID for the document
 
-    // Replace with your credentials
-    $correct_username = 'cahyonegoro';
-    $correct_password = 'M@ster234';
+    // Generate QR code
+    require_once 'phpqrcode/qrlib.php'; // Ensure you have the phpqrcode library included
+    $qrContent = "https://cahyonegoro.com/documents/verify.php?id=$id";
+    $qrFile = "qr_codes/$id.png";
+    QRcode::png($qrContent, $qrFile, 'L', 4, 2);
 
-    if ($username === $correct_username && $password === $correct_password) {
-        $_SESSION['loggedin'] = true;
-        header("Location: index.php");
-        exit;
-    } else {
-        $error = "Invalid username or password.";
+    // Save document information to a file
+    $file = fopen('documents.txt', 'a');
+    fwrite($file, "$id|$title|$date\n");
+    fclose($file);
+
+    // Redirect to avoid form resubmission
+    header("Location: index.php");
+    exit;
+}
+
+// Handle document deletion
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete') {
+    $deleteId = $_POST['id'];
+
+    // Read all lines from the documents file
+    $lines = file('documents.txt');
+    $newLines = [];
+
+    foreach ($lines as $line) {
+        list($id, $title, $date) = explode('|', trim($line));
+        if ($id != $deleteId) {
+            $newLines[] = $line; // Keep line if ID does not match
+        } else {
+            // Delete QR code file
+            $qrFile = "qr_codes/$id.png";
+            if (file_exists($qrFile)) {
+                unlink($qrFile);
+            }
+        }
     }
+
+    // Write back the remaining lines
+    file_put_contents('documents.txt', implode("", $newLines));
+
+    // Redirect to avoid form resubmission
+    header("Location: index.php");
+    exit;
 }
 ?>
 
@@ -31,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Document</title>
+    <title>Document Management</title>
     <style>
         body {
             font-family: Arial, sans-serif;
